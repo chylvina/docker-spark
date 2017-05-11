@@ -1,13 +1,6 @@
-FROM debian:jessie
-MAINTAINER Getty Images "https://github.com/gettyimages"
+FROM ubuntu:16.04
 
 RUN apt-get update \
- && apt-get install -y locales \
- && dpkg-reconfigure -f noninteractive locales \
- && locale-gen C.UTF-8 \
- && /usr/sbin/update-locale LANG=C.UTF-8 \
- && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
- && locale-gen \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -17,10 +10,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update \
- && apt-get install -y curl unzip \
-    python3 python3-setuptools \
- && ln -s /usr/bin/python3 /usr/bin/python \
- && easy_install3 pip py4j \
+ && apt-get install -y curl unzip vim python \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -45,7 +35,7 @@ RUN curl -sL --retry 3 --insecure \
   && rm -rf $JAVA_HOME/man
 
 # HADOOP
-ENV HADOOP_VERSION 2.7.3
+ENV HADOOP_VERSION 2.8.0
 ENV HADOOP_HOME /usr/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ENV PATH $PATH:$HADOOP_HOME/bin
@@ -57,7 +47,7 @@ RUN curl -sL --retry 3 \
  && chown -R root:root $HADOOP_HOME
 
 # SPARK
-ENV SPARK_VERSION 2.1.0
+ENV SPARK_VERSION 2.1.1
 ENV SPARK_PACKAGE spark-${SPARK_VERSION}-bin-without-hadoop
 ENV SPARK_HOME /usr/spark-${SPARK_VERSION}
 ENV SPARK_DIST_CLASSPATH="$HADOOP_HOME/etc/hadoop/*:$HADOOP_HOME/share/hadoop/common/lib/*:$HADOOP_HOME/share/hadoop/common/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/hdfs/lib/*:$HADOOP_HOME/share/hadoop/hdfs/*:$HADOOP_HOME/share/hadoop/yarn/lib/*:$HADOOP_HOME/share/hadoop/yarn/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*:$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/tools/lib/*"
@@ -70,4 +60,8 @@ RUN curl -sL --retry 3 \
  && chown -R root:root $SPARK_HOME
 
 WORKDIR $SPARK_HOME
+
+COPY ./conf /conf
+
 CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master"]
+
