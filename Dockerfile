@@ -4,13 +4,9 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Users with other locales should set this in their derivative image
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
 RUN apt-get update \
- && apt-get install -y curl unzip vim python \
+ && apt-get install -y curl unzip vim python-pip \
+ && pip install -U pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
